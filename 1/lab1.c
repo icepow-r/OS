@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 typedef struct
 {
@@ -19,9 +18,7 @@ void *proc1(void *arg)
         fflush(stdout);
         sleep(1);
     }
-    int *result = calloc(1, sizeof(int));
-    *result = 1;
-    return (void *)result;
+    pthread_exit((void *)1);
 }
 
 void *proc2(void *arg)
@@ -33,9 +30,7 @@ void *proc2(void *arg)
         fflush(stdout);
         sleep(1);
     }
-    int *result = calloc(1, sizeof(int));
-    *result = 2;
-    return (void *)result;
+    pthread_exit((void *)2);
 }
 
 int main()
@@ -49,13 +44,25 @@ int main()
     ti2.sym = '2';
 
     pthread_create(&ti1.id, NULL, proc1, &ti1);
+    printf("Поток 1 создан\n");
     pthread_create(&ti2.id, NULL, proc2, &ti2);
+    printf("Поток 2 создан\n");
+
+    printf("Ожидание нажатия клавиши\n");
     getchar();
+    printf("Клавиша нажата\n");
+
     ti1.flag = 1;
     ti2.flag = 1;
     int *result1, *result2;
+
     pthread_join(ti1.id, (void **)&result1);
+    printf("Поток 1 остановлен\n");
+
     pthread_join(ti2.id, (void **)&result2);
-    printf("Result1: %d\n", *result1);
-    printf("Result2: %d\n", *result2);
+    printf("Поток 2 остановлен\n");
+
+    printf("Код завершения 1 потока: %p\n", result1);
+    printf("Код завершения 2 потока: %p\n", result2);
+    printf("Программа завершила работу\n");
 }
