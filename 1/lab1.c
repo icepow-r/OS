@@ -1,6 +1,9 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <errno.h>
 
 typedef struct
 {
@@ -59,10 +62,29 @@ int main()
 
     int *result1, *result2;
 
-    pthread_join(ti1.id, (void **)&result1); /* ожидание завершения потока 1: ti1.id - дескриптор потока, result1 - указатель для получения кода завершения потока */
+    int join1 = pthread_tryjoin_np(ti1.id, (void **)&result1); /* неблокирующее завершение потока 1: ti1.id - дескриптор потока, result1 - указатель для получения кода завершения потока */
+
+    while (join1 != 0)
+    {
+        if (join1 == EBUSY)
+        {
+            printf("поток 1 ещё не завершён\n");
+        }
+        sleep(1);
+        join1 = pthread_tryjoin_np(ti1.id, (void **)&result1); /* неблокирующее завершение потока 1: ti1.id - дескриптор потока, result1 - указатель для получения кода завершения потока */
+    }
     printf("поток 1 закончил работу\n");
 
-    pthread_join(ti2.id, (void **)&result2); /* ожидание завершения потока 2: ti2.id - дескриптор потока, result2 - указатель для получения кода завершения потока */
+    int join2 = pthread_tryjoin_np(ti2.id, (void **)&result2); /* неблокирующее завершение потока 2: ti2.id - дескриптор потока, result2 - указатель для получения кода завершения потока */
+    while (join2 != 0)
+    {
+        if (join2 == EBUSY)
+        {
+            printf("поток 2 ещё не завершён\n");
+        }
+        sleep(1);
+        join2 = pthread_tryjoin_np(ti2.id, (void **)&result2); /* неблокирующее завершение потока 2: ti2.id - дескриптор потока, result2 - указатель для получения кода завершения потока */
+    }
     printf("поток 2 закончил работу\n");
 
     printf("код завершения 1 потока: %p\n", result1);
