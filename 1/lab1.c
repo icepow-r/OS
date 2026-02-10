@@ -38,7 +38,7 @@ void *proc2(void *arg)
 
 int main()
 {
-    printf("программа начала работу");
+    printf("программа начала работу\n");
     thread_info ti1;
     thread_info ti2;
 
